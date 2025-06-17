@@ -1,6 +1,9 @@
+fastapi
+uvicorn[standard]
+opencv-python
+numpy
+Pillow
 torch
 torchvision
-pillow
-fastapi
-uvicorn
-lama-cleaner
+ultralytics
+pycocotools  # if you use COCO-based training/testing elsewhere
