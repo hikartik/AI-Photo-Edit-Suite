@@ -1,20 +1,37 @@
+# Dockerfile for CPU-based FastAPI + YOLOv8-seg + PConv U-Net GAN inference
+
+# 1. Base image
 FROM python:3.9-slim
 
-RUN apt-get update && apt-get install -y libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
+# 2. Install system dependencies needed by OpenCV etc.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        libgl1 \
+        libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
 
+# 3. Set working directory
 WORKDIR /app
 
-# Copy requirements and install
+# 4. Copy and install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
-# Copy application code
+# 5. Copy application code
 COPY app/ ./app/
-# Copy weights
-COPY models/ ./models/
-# Copy YOLOv8-seg.pt if you keep locally; else you can let ultralytics download
-COPY yolov8n-seg.pt ./app/  # or adjust path in detector.py accordingly
 
+# 6. Copy model weights
+COPY models/ ./models/
+
+# 7. Copy YOLO weights if needed for offline use
+COPY yolov8n-seg.pt ./app/
+
+# 8. (Optional) Environment variables for weight paths
+ENV INPAINT_GEN_PATH=/app/models/inpaint_gan.pth
+ENV YOLO_SEG_PATH=/app/app/yolov8n-seg.pt
+
+# 9. Expose port
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# 10. Launch FastAPI with Uvicorn
+CMD ["uvicorn", "app.main:app", "--port", "8000"]

@@ -36,6 +36,10 @@ except Exception as e:
     logger.error(f"Failed to load generator weights: {e}\n{traceback.format_exc()}")
     GEN = None
 
+@app.get("/healthz", include_in_schema=False)
+async def health():
+    return {"status":"ok"}
+
 @app.post("/erase/")
 async def erase_endpoint(file: UploadFile = File(...), prompt: str = Form(...)):
     if GEN is None:

@@ -1,0 +1,56 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# IDE/editor configs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter Notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and runtime files
+*.log
+*.sqlite3
+
+# Test/coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Local environment variables
+.env
+.env.*
+
+# Local data or notebook directories (e.g., Kaggle)
+kaggle/
+data/
+notebooks/
+
+# Docker Compose override
+docker-compose.override.yml
+
+# Temporary files/directories
+tmp/
+*.tmp
+
+# If you have local model weights that you DO NOT want baked into the image,
+# uncomment the following line. Otherwise keep models/ so weights are copied into the image.
+# models/*.pth
+
+# Ensure essential files/folders are NOT ignored:
+#   app/, models/ (unless above), requirements.txt, Dockerfile, yolov8n-seg.pt, README.md
