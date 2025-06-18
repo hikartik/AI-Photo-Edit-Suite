@@ -36,6 +36,11 @@ except Exception as e:
     logger.error(f"Failed to load generator weights: {e}\n{traceback.format_exc()}")
     GEN = None
 
+@app.get("/")
+async def root():
+    return {"message": "Service is up. Use POST /erase/ to inpaint."}
+
+
 @app.get("/healthz", include_in_schema=False)
 async def health():
     return {"status":"ok"}
