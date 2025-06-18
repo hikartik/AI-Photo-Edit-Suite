@@ -117,14 +117,6 @@ $ uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 ---
 
-## Roadmap
-
--
-
-## Contributing
-
-PRs & issues are welcome! See `CONTRIBUTING.md`.
-
 ## License
 
 MIT © 2025 Kartik Kumar
