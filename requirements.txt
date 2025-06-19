@@ -8,3 +8,5 @@ torchvision
 ultralytics
 pycocotools  # if you use COCO-based training/testing elsewhere
 python-multipart
+scikit-image
+pyyaml
