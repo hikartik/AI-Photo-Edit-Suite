@@ -42,22 +42,25 @@ The service is now live on [http://localhost:8000](http://localhost:8000). Visit
 
 ### Environment Variables
 
-| Variable          | Default   | Description
-| ----------------- | --------- | ----------------------------------------------
-| `MODEL_DIR`       | `/models` | Folder containing `yolov8n-seg.pt` and `gan_unet.pth`
-| `ALLOWED_ORIGINS` | `*`       | CORS origins (comma-separated)
-| `MAX_RESOLUTION`  | `2048`    | Safeguard against huge uploads
-| `INPAINT_MODEL`   | `ganunet` | `ganunet` or `edgeconnect`
-| `EDGE_MODEL_DIR`  | `edge_checkpoints` | Directory with EdgeConnect weights
+| Variable          | Default   | Description                                           |
+| ----------------- | --------- | ----------------------------------------------------- |
+| `MODEL_DIR`       | `/models` | Folder containing `yolov8n-seg.pt` and `gan_unet.pth` |
+| `ALLOWED_ORIGINS` | `*`       | CORS origins (comma‑separated)                        |
+| `MAX_RESOLUTION`  | `2048`    | Safeguard against huge uploads                        |
+
+---
+
+## API Reference
 
 ### `POST /erase`
 
 **Form‑Data Fields**
 
-| Field    | Type            | Required | Example
-| -------- | --------------- | -------- | ---------
-| `image`  | File (JPEG/PNG) | ✔︎       | `cat.jpg`
-| `prompt` | String          | ✔︎       | `cat`
+| Field    | Type            | Required | Example   |
+| -------- | --------------- | -------- | --------- |
+| `image`  | File (JPEG/PNG) | ✔︎       | `cat.jpg` |
+| `prompt` | String          | ✔︎       | `cat`     |
+
 **Response** `image/jpeg` – edited image bytes. Errors follow RFC 7807 problem+json.
 
 ---
@@ -96,10 +99,11 @@ $ uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 ## Performance
 
-| Image Size | Mean Latency (CPU) | Mean Latency (GPU)
-| ---------- | ------------------ | ------------------
-| 512×512    | 0.9 s              | 120 ms
-| 1024×1024  | 2.4 s              | 310 ms
+| Image Size | Mean Latency (CPU) | Mean Latency (GPU) |
+| ---------- | ------------------ | ------------------ |
+| 512×512    | 0.9 s              | 120 ms             |
+| 1024×1024  | 2.4 s              | 310 ms             |
+
 *Benchmarked on AMD Ryzen 7 4800H (CPU) and RTX 3060‑Laptop GPU.*
 
 ---
