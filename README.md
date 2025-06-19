@@ -66,7 +66,7 @@ The service is now live on [http://localhost:8000](http://localhost:8000). Visit
 
 ```bash
 # Clone
-$ git clone https://github.com/hiikartik/ai-photo-edit-service.git
+$ git clone https://github.com/hikartik/AI-Photo-Edit-Suite.git
 $ cd ai-photo-edit-service
 
 # Install deps (Torch 2.3, Ultralytics v8, FastAPI, etc.)
