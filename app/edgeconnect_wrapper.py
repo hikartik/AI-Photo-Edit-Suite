@@ -7,13 +7,13 @@ import numpy as np
 import torch
 from skimage.feature import canny
 
-# Add EdgeConnect src to path
-EC_SRC_PATH = os.path.join(os.path.dirname(__file__), '..', 'external', 'edge-connect', 'src')
-if EC_SRC_PATH not in sys.path:
-    sys.path.append(EC_SRC_PATH)
+# Add EdgeConnect package root to path so imports work as package `src.*`
+EC_ROOT = os.path.join(os.path.dirname(__file__), '..', 'external', 'edge-connect')
+if EC_ROOT not in sys.path:
+    sys.path.append(EC_ROOT)
 
-from config import Config  # type: ignore
-from models import EdgeModel, InpaintingModel  # type: ignore
+from src.config import Config  # type: ignore
+from src.models import EdgeModel, InpaintingModel  # type: ignore
 
 
 def load_edgeconnect(checkpoints_dir: str, device=None) -> Tuple[EdgeModel, InpaintingModel, Config]:
