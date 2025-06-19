@@ -2,6 +2,7 @@
 
 import io
 import logging
+import os
 import traceback
 
 import cv2
@@ -14,6 +15,7 @@ from .detector import get_masks
 from .utils import parse_prompt, merge_masks
 from .inpainting import erase_and_inpaint
 from .gan_inpainter import load_generator
+from .edgeconnect_wrapper import load_edgeconnect, edgeconnect_inpaint
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -24,17 +26,27 @@ app = FastAPI()
 # If running on CPU, limit threads to avoid oversubscription
 torch.set_num_threads(4)
 
-# Load GAN generator at startup
+# Model selection
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 MODEL_SIZE = (256, 256)  # resolution used in training (height, width)
-GEN_WEIGHTS_PATH = "models/inpaint_gan.pth"
+INPAINT_MODEL = os.getenv("INPAINT_MODEL", "ganunet").lower()
 
-try:
-    GEN = load_generator(GEN_WEIGHTS_PATH, device=DEVICE)
-    logger.info(f"Loaded GAN generator from {GEN_WEIGHTS_PATH} onto {DEVICE}")
-except Exception as e:
-    logger.error(f"Failed to load generator weights: {e}\n{traceback.format_exc()}")
-    GEN = None
+if INPAINT_MODEL == "edgeconnect":
+    EDGE_DIR = os.getenv("EDGE_MODEL_DIR", "edge_checkpoints")
+    try:
+        EDGE_EDGE_MODEL, EDGE_INPAINT_MODEL, EDGE_CONFIG = load_edgeconnect(EDGE_DIR, device=DEVICE)
+        logger.info(f"Loaded EdgeConnect models from {EDGE_DIR}")
+    except Exception as e:
+        logger.error(f"Failed to load EdgeConnect models: {e}\n{traceback.format_exc()}")
+        EDGE_EDGE_MODEL = EDGE_INPAINT_MODEL = EDGE_CONFIG = None
+else:
+    GEN_WEIGHTS_PATH = "models/inpaint_gan.pth"
+    try:
+        GEN = load_generator(GEN_WEIGHTS_PATH, device=DEVICE)
+        logger.info(f"Loaded GAN generator from {GEN_WEIGHTS_PATH} onto {DEVICE}")
+    except Exception as e:
+        logger.error(f"Failed to load generator weights: {e}\n{traceback.format_exc()}")
+        GEN = None
 
 @app.get("/")
 async def root():
@@ -47,8 +59,12 @@ async def health():
 
 @app.post("/erase/")
 async def erase_endpoint(file: UploadFile = File(...), prompt: str = Form(...)):
-    if GEN is None:
-        raise HTTPException(status_code=500, detail="Generator not loaded.")
+    if INPAINT_MODEL == "edgeconnect":
+        if EDGE_EDGE_MODEL is None or EDGE_INPAINT_MODEL is None:
+            raise HTTPException(status_code=500, detail="EdgeConnect models not loaded.")
+    else:
+        if GEN is None:
+            raise HTTPException(status_code=500, detail="Generator not loaded.")
 
     # 1) Read and decode image
     try:
@@ -78,9 +94,19 @@ async def erase_endpoint(file: UploadFile = File(...), prompt: str = Form(...)):
         logger.error(f"Error creating mask: {e}\n{traceback.format_exc()}")
         raise HTTPException(status_code=400, detail=f"Mask creation failed: {e}")
 
-    # 3) Inpaint with GAN (with resizing & normalization)
+    # 3) Inpaint
     try:
-        result = erase_and_inpaint(img, erase_mask, GEN, device=DEVICE, model_size=MODEL_SIZE)
+        if INPAINT_MODEL == "edgeconnect":
+            result = edgeconnect_inpaint(
+                img,
+                erase_mask.astype(np.float32),
+                EDGE_EDGE_MODEL,
+                EDGE_INPAINT_MODEL,
+                EDGE_CONFIG,
+                device=DEVICE,
+            )
+        else:
+            result = erase_and_inpaint(img, erase_mask, GEN, device=DEVICE, model_size=MODEL_SIZE)
         # result: H0 x W0 x 3 uint8 RGB
     except Exception as e:
         logger.error(f"Inpainting failed: {e}\n{traceback.format_exc()}")
